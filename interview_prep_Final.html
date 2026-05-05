@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DevOps/SRE Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e2a;
+    --bg4: #222638;
+    --border: #2a2f45;
+    --border2: #373d5a;
+    --text: #e8eaf0;
+    --text2: #9aa0bd;
+    --text3: #5c6180;
+    --accent: #5b8af5;
+    --accent2: #7c5bf5;
+    --green: #3ecf8e;
+    --yellow: #f5c842;
+    --red: #f55b7a;
+    --orange: #f5935b;
+    --purple: #c47af5;
+    --glow: 0 0 20px rgba(91,138,245,0.15);
+    --radius: 10px;
+  }
+  .light {
+    --bg: #f0f2f8;
+    --bg2: #ffffff;
+    --bg3: #e8ebf5;
+    --bg4: #dde2f0;
+    --border: #d0d5e8;
+    --border2: #bcc3dc;
+    --text: #1a1e2a;
+    --text2: #4a5070;
+    --text3: #7a82a0;
+    --glow: 0 0 20px rgba(91,138,245,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s, min-width 0.3s;
+    position: relative;
+    z-index: 10;
+  }
+  #sidebar.collapsed { width: 0; min-width: 0; }
+  .sidebar-header {
+    padding: 20px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .logo-text { font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  #sidebar-search {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 7px; padding: 7px 10px 7px 28px; color: var(--text);
+    font-family: 'Sora', sans-serif; font-size: 12px; outline: none;
+    transition: border-color 0.2s;
+  }
+  #sidebar-search:focus { border-color: var(--accent); }
+  .search-wrap { position: relative; }
+  .search-wrap::before {
+    content: '⌕'; position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 14px; pointer-events: none;
+  }
+  .sidebar-body { flex: 1; overflow-y: auto; padding: 10px 0; }
+  .sidebar-body::-webkit-scrollbar { width: 3px; }
+  .sidebar-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .nav-section { margin-bottom: 4px; }
+  .nav-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 14px; cursor: pointer; color: var(--text3);
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-section-header:hover { color: var(--text2); }
+  .nav-section-header .chevron { transition: transform 0.2s; font-style: normal; }
+  .nav-section-header.open .chevron { transform: rotate(90deg); }
+  .nav-items { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .nav-items.open { max-height: 600px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 14px 7px 22px; cursor: pointer; color: var(--text2);
+    font-size: 12.5px; border-radius: 0; transition: all 0.15s;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active {
+    color: var(--accent); background: rgba(91,138,245,0.08);
+    font-weight: 600;
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent); border-radius: 0 2px 2px 0;
+  }
+  .nav-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .nav-count {
+    margin-left: auto; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+    color: var(--text3); background: var(--bg3); padding: 1px 5px;
+    border-radius: 10px;
+  }
+
+  /* ── MAIN ── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0 20px; display: flex; align-items: center; gap: 12px;
+    height: 56px; flex-shrink: 0;
+  }
+  #toggle-sidebar {
+    background: none; border: 1px solid var(--border); color: var(--text2);
+    width: 32px; height: 32px; border-radius: 7px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  #toggle-sidebar:hover { border-color: var(--accent); color: var(--accent); }
+  .breadcrumb { color: var(--text3); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .breadcrumb span { color: var(--text2); }
+  .breadcrumb .sep { color: var(--text3); }
+  #topbar-tabs {
+    display: flex; gap: 2px; overflow-x: auto; flex: 1;
+    scrollbar-width: none;
+  }
+  #topbar-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none; color: var(--text3);
+    padding: 6px 12px; border-radius: 7px; cursor: pointer; font-family: 'Sora',sans-serif;
+    font-size: 12px; white-space: nowrap; transition: all 0.15s; font-weight: 500;
+  }
+  .tab-btn:hover { color: var(--text2); background: var(--bg3); }
+  .tab-btn.active { color: var(--accent); background: rgba(91,138,245,0.1); font-weight: 600; }
+
+  .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+  .icon-btn {
+    background: none; border: 1px solid var(--border); color: var(--text2);
+    width: 32px; height: 32px; border-radius: 7px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .add-btn {
+    background: var(--accent); border: none; color: white;
+    padding: 6px 14px; border-radius: 7px; cursor: pointer; font-family: 'Sora',sans-serif;
+    font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px;
+    transition: opacity 0.2s;
+  }
+  .add-btn:hover { opacity: 0.85; }
+  .add-company-btn {
+    width: 100%; background: var(--accent); border: none; color: white;
+    padding: 6px 14px; border-radius: 7px; cursor: pointer; font-family: 'Sora',sans-serif;
+    font-size: 12px; font-weight: 600; margin-top: 5px; transition: opacity 0.2s;
+  }
+  .add-company-btn:hover { opacity: 0.85; }
+
+  /* ── CONTENT ── */
+  #content { flex: 1; overflow-y: auto; padding: 20px; }
+  #content::-webkit-scrollbar { width: 4px; }
+  #content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .toolbar-search-wrap { position: relative; flex: 1; min-width: 180px; }
+  .toolbar-search-wrap::before {
+    content: '⌕'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 15px; pointer-events: none;
+  }
+  #q-search {
+    width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px 8px 30px; color: var(--text);
+    font-family: 'Sora', sans-serif; font-size: 13px; outline: none;
+    transition: border-color 0.2s;
+  }
+  #q-search:focus { border-color: var(--accent); }
+  .filter-btn {
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text2);
+    padding: 7px 12px; border-radius: 8px; cursor: pointer; font-family: 'Sora',sans-serif;
+    font-size: 12px; transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(91,138,245,0.08); }
+  .filter-sep { color: var(--border2); font-size: 16px; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; flex: 1; min-width: 130px;
+  }
+  .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono',monospace; }
+  .stat-bar {
+    height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 6px; overflow: hidden;
+  }
+  .stat-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s; }
+
+  /* ── SECTION HEADING ── */
+  .section-heading {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px; margin-top: 6px;
+  }
+  .section-heading h2 { font-size: 15px; font-weight: 600; }
+  .section-heading .q-count { font-size: 11px; color: var(--text3); font-family:'JetBrains Mono',monospace; background: var(--bg3); padding: 2px 7px; border-radius: 10px; }
+
+  /* ── QUESTION CARDS ── */
+  .q-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px; transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+  .q-card:hover { border-color: var(--border2); box-shadow: var(--glow); }
+  .q-card.reviewed { border-left: 3px solid var(--green); }
+  .q-card.bookmarked { border-left: 3px solid var(--yellow); }
+  .q-card.reviewed.bookmarked { border-left: 3px solid var(--green); }
+
+  .q-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; cursor: pointer; user-select: none;
+  }
+  .q-num {
+    font-family: 'JetBrains Mono',monospace; font-size: 11px; color: var(--text3);
+    background: var(--bg3); padding: 2px 6px; border-radius: 5px; flex-shrink: 0; margin-top: 1px;
+  }
+  .q-text { flex: 1; font-size: 13.5px; line-height: 1.5; font-weight: 500; }
+  .q-meta { display: flex; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .tag-easy { background: rgba(62,207,142,0.12); color: var(--green); }
+  .tag-medium { background: rgba(245,200,66,0.12); color: var(--yellow); }
+  .tag-hard { background: rgba(245,91,122,0.12); color: var(--red); }
+  .tag-topic { background: rgba(91,138,245,0.1); color: var(--accent); }
+  .tag-company { background: rgba(196,122,245,0.1); color: var(--purple); }
+  .tag-scenario { background: rgba(245,147,91,0.1); color: var(--orange); }
+
+  .q-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-top: -2px; }
+  .qa-btn {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    padding: 4px 5px; border-radius: 5px; font-size: 14px; transition: all 0.15s;
+    line-height: 1;
+  }
+  .qa-btn:hover { color: var(--text); background: var(--bg3); }
+  .qa-btn.on-review { color: var(--green); }
+  .qa-btn.on-bookmark { color: var(--yellow); }
+  .chevron-q { transition: transform 0.25s; display: inline-block; color: var(--text3); font-size: 12px; }
+  .q-card.open .chevron-q { transform: rotate(180deg); }
+
+  .q-answer {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+    border-top: 0px solid var(--border);
+  }
+  .q-card.open .q-answer {
+    max-height: 1200px;
+    border-top: 1px solid var(--border);
+  }
+  .q-answer-inner { padding: 14px 16px 14px 44px; }
+  .q-answer-inner p { color: var(--text2); line-height: 1.7; font-size: 13px; margin-bottom: 8px; }
+  .q-answer-inner ul { color: var(--text2); padding-left: 18px; font-size: 13px; line-height: 1.8; }
+  .q-answer-inner li { margin-bottom: 3px; }
+  .q-answer-inner code {
+    background: var(--bg3); padding: 1px 5px; border-radius: 4px;
+    font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--accent);
+  }
+  .q-answer-inner pre {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; font-family: 'JetBrains Mono',monospace; font-size: 12px;
+    color: var(--text2); overflow-x: auto; margin: 8px 0;
+    line-height: 1.6;
+  }
+  .note-area {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .note-area textarea {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 10px; color: var(--text2);
+    font-family: 'Sora',sans-serif; font-size: 12px; resize: vertical; outline: none;
+    min-height: 60px; transition: border-color 0.2s;
+  }
+  .note-area textarea:focus { border-color: var(--accent); }
+  .note-label { font-size: 10px; color: var(--text3); margin-bottom: 5px; display: block; letter-spacing: 0.5px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--text3);
+  }
+  .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; margin-bottom: 6px; color: var(--text2); }
+  .empty-state small { font-size: 12px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px;
+    width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    background: var(--bg2);
+  }
+  .modal-header h3 { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    background: none; border: none; color: var(--text3); cursor: pointer;
+    font-size: 18px; padding: 2px 6px; border-radius: 5px; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 11px; color: var(--text);
+    font-family: 'Sora',sans-serif; font-size: 13px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .form-select option { background: var(--bg2); }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .modal-footer {
+    display: flex; gap: 10px; justify-content: flex-end;
+    padding: 16px 20px; border-top: 1px solid var(--border);
+  }
+  .btn-cancel {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family:'Sora',sans-serif; font-size: 13px;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--border2); }
+  .btn-save {
+    background: var(--accent); border: none; color: white;
+    padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family:'Sora',sans-serif;
+    font-size: 13px; font-weight: 600; transition: opacity 0.2s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* ── IMPORT/EXPORT PANEL ── */
+  .io-panel { display: none; }
+  .io-panel.open { display: block; }
+
+  /* ── PROGRESS ── */
+  .progress-section { margin-bottom: 6px; }
+  .progress-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .progress-bar { height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 2px; transition: width 0.5s; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    #sidebar.collapsed { width: 0; min-width: 0; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-card { min-width: 120px; }
+  }
+
+  /* ANIMATIONS */
+  .q-card { animation: fadeUp 0.2s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TOOLTIP */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: fixed;
+    top: var(--tip-top, -999px);
+    left: var(--tip-left, -999px);
+    transform: translateX(-50%);
+    background: var(--bg4);
+    color: var(--text);
+    font-size: 11px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    border: 1px solid var(--border2);
+    z-index: 9999;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  }
+  [data-tip]::before {
+    content: '';
+    position: fixed;
+    top: var(--tip-arrow, -999px);
+    left: var(--tip-left, -999px);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: var(--border2);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    z-index: 9999;
+  }
+  [data-tip]:hover::after,
+  [data-tip]:hover::before { opacity: 1; }
+
+  .highlight { background: rgba(91,138,245,0.25); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">PrepKit</div>
+        <div class="logo-sub">DevOps · SRE · Cloud</div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <input id="sidebar-search" type="text" placeholder="Filter topics…" />
+    </div>
+  </div>
+  <div class="sidebar-body" id="sidebar-body"></div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <button id="toggle-sidebar" data-tip="Toggle sidebar">☰</button>
+    <div class="breadcrumb">
+      <span id="bc-cat">All</span>
+      <span class="sep">›</span>
+      <span id="bc-topic">Questions</span>
+    </div>
+    <div id="topbar-tabs"></div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btn-import-export" data-tip="Import / Export">⇅</button>
+      <button class="icon-btn" id="btn-theme" data-tip="Toggle theme">◐</button>
+      <button class="add-btn" id="btn-add">+ Add Question</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <div class="stats-bar" id="stats-bar"></div>
+    <div class="toolbar">
+      <div class="toolbar-search-wrap">
+        <input id="q-search" type="text" placeholder="Search questions and answers…" />
+      </div>
+      <button class="filter-btn active" data-diff="all">All</button>
+      <button class="filter-btn" data-diff="easy">Easy</button>
+      <button class="filter-btn" data-diff="medium">Medium</button>
+      <button class="filter-btn" data-diff="hard">Hard</button>
+      <span class="filter-sep">|</span>
+      <button class="filter-btn" id="btn-show-reviewed">✓ Reviewed</button>
+      <button class="filter-btn" id="btn-show-bookmarked">★ Bookmarked</button>
+    </div>
+    <div id="q-list"></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add Question</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id" />
+      <div class="form-group">
+        <label class="form-label">Question *</label>
+        <textarea class="form-textarea" id="f-question" placeholder="Enter your interview question…" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Answer / Explanation</label>
+        <textarea class="form-textarea" id="f-answer" placeholder="Provide a detailed answer…" rows="5"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="f-category"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Topic / Subcategory</label>
+          <select class="form-select" id="f-topic"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Difficulty</label>
+          <select class="form-select" id="f-difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Extra Tags (comma-separated)</label>
+          <input class="form-input" id="f-tags" placeholder="e.g. kubernetes, aws, incident" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-save" id="modal-save">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT/EXPORT MODAL -->
+<div class="modal-overlay" id="io-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Import / Export</h3>
+      <button class="modal-close" id="io-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Export as JSON</label>
+        <p style="color:var(--text2);font-size:12px;margin-bottom:10px;">Download all your questions as a JSON file. You can re-import this later.</p>
+        <button class="btn-save" id="btn-export-json" style="width:100%">⬇ Export JSON</button>
+      </div>
+      <div class="form-group" style="margin-top:20px">
+        <label class="form-label">Import from JSON</label>
+        <p style="color:var(--text2);font-size:12px;margin-bottom:10px;">Import questions from a previously exported JSON file. This will merge with existing questions.</p>
+        <input type="file" id="import-file" accept=".json" style="display:none" />
+        <button class="btn-cancel" id="btn-pick-file" style="width:100%">⬆ Pick JSON File</button>
+        <div id="import-status" style="margin-top:8px;font-size:12px;color:var(--green);"></div>
+      </div>
+      <div class="form-group" style="margin-top:20px">
+        <label class="form-label">How to Add New Topics Without Code</label>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7;">
+          <strong style="color:var(--text)">📌 Tip:</strong> Export your data as JSON, edit the file to add new categories, topics, or questions, then re-import. No code changes needed!<br><br>
+          <strong style="color:var(--text)">JSON Structure:</strong><br>
+          <code style="color:var(--accent)">{ "categories": { "technology": { "linux": [...] } } }</code><br><br>
+          To add a new category "Cloud": add <code style="color:var(--accent)">"cloud": { "aws": [...] }</code> under <code style="color:var(--accent)">categories</code>.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="io-modal-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA — DEFAULT DATASET (extracted from PDF)
+// ═══════════════════════════════════════════
+const DEFAULT_DATA = {
+  categories: {
+    topics: {
+      label: "Topics",
+      color: "#5b8af5",
+      subcategories: {
+        sre: {
+          label: "SRE Scenarios",
+          questions: [
+            { id:"sre1", q:"Your application latency suddenly increased from 100ms to 2 seconds after a new deployment. How would you investigate?", a:"1. Check deployment diff — what changed?\n2. Compare metrics before/after deploy: p50, p95, p99 latency\n3. Check APM traces for slow spans (DB queries, external calls)\n4. Review CPU, memory, GC logs on app servers\n5. Check if a downstream dependency is slow (DB, cache, 3rd-party API)\n6. If code change: rollback and verify recovery\n7. Long-term: add pre-deploy performance benchmarks, canary releases", diff:"hard", tags:["incident","latency","performance"] },
+            { id:"sre2", q:"CPU usage on all application servers suddenly spikes to 95% during business hours. What's your troubleshooting approach?", a:"1. Identify which process is consuming CPU: top / htop / ps aux\n2. Check if it's a known cron job or scheduled task\n3. Review recent deployments or config changes\n4. Profile the application: Java thread dumps, Python profilers\n5. Check for a traffic spike: load balancer access logs\n6. Look for infinite loops, runaway threads\n7. Scale horizontally if needed while investigating", diff:"hard", tags:["cpu","linux","performance"] },
+            { id:"sre3", q:"Disk usage on a critical database server has reached 90%. What immediate and long-term actions would you take?", a:"Immediate:\n- df -h to confirm\n- du -sh /* to find large directories\n- Archive/delete old logs: /var/log\n- Remove unused Docker images: docker system prune\n- Notify DBA to purge old data\n\nLong-term:\n- Set up automated log rotation (logrotate)\n- Configure disk usage alerts at 70%, 80%\n- Implement data archival policies\n- Add storage monitoring to runbooks", diff:"medium", tags:["linux","database","disk"] },
+            { id:"sre4", q:"Error rates increased from 1% to 20% in 15 minutes. How would you identify the root cause?", a:"1. Check which endpoints are failing (APM, access logs)\n2. Sample error messages from logs\n3. Correlate with recent deployments or changes\n4. Check downstream services health\n5. Review DB connection pool status\n6. Check infra changes: DNS, LB rules, firewall\n7. Use distributed tracing to pinpoint failure point\n8. Rollback if a deployment is correlated", diff:"hard", tags:["incident","errors","observability"] },
+            { id:"sre5", q:"A production API is returning 502/504 gateway timeout errors intermittently. How would you debug?", a:"502 = bad gateway (upstream didn't respond correctly)\n504 = gateway timeout (upstream too slow)\n\nSteps:\n1. Check backend server health: are they running?\n2. Review LB health check status\n3. Check backend response time vs LB timeout setting\n4. Look at backend logs for errors\n5. Check connection limits on upstream servers\n6. Review recent config changes to nginx/haproxy\n7. Test directly to backend, bypassing LB", diff:"hard", tags:["networking","loadbalancer","incident"] },
+            { id:"sre6", q:"You're on-call at 2 AM and receive an alert that a microservice is down. Walk through your response.", a:"1. Acknowledge alert — stop paging\n2. Assess impact — how many users affected?\n3. Check service status: kubectl get pods / systemctl status\n4. Review recent logs: kubectl logs\n5. Check if it's a single instance or cluster-wide\n6. Immediate mitigation: restart pod, redirect traffic\n7. Escalate to dev team if code issue suspected\n8. Write incident timeline in real-time\n9. Post-incident: schedule blameless postmortem", diff:"hard", tags:["oncall","incident","kubernetes"] },
+            { id:"sre7", q:"Multiple Kubernetes pods are in CrashLoopBackOff state. How do you troubleshoot and recover?", a:"kubectl get pods — confirm which pods\nkubectl describe pod <name> — check Events section\nkubectl logs <pod> --previous — last run logs\n\nCommon causes:\n- OOMKilled: increase memory limits\n- Config error: wrong env var or secret\n- Missing dependency: DB or service not ready\n- Image issue: bad image tag\n\nFix:\n- Address root cause\n- kubectl rollout undo deployment/<name> to rollback\n- Set proper resource requests/limits", diff:"hard", tags:["kubernetes","debugging","containers"] },
+            { id:"sre8", q:"A load balancer health check is failing for a subset of servers. How do you identify the issue?", a:"1. Check which specific backend servers are failing\n2. SSH into failing server — is the app running?\n3. Manually hit the health check endpoint: curl http://server:port/health\n4. Compare response with passing servers\n5. Check app logs for startup errors\n6. Verify security groups/firewall allow LB to reach server\n7. Check if health check path/port matches LB config", diff:"medium", tags:["networking","loadbalancer","healthcheck"] },
+            { id:"sre9", q:"How would you conduct a blameless postmortem after a Sev-1 incident?", a:"Structure:\n1. Incident summary (what happened, when, impact)\n2. Timeline of events — detection to resolution\n3. Root cause analysis (5 Whys)\n4. Contributing factors\n5. What went well\n6. Action items with owners and due dates\n\nKey principles:\n- No blame on individuals\n- Focus on systems and processes\n- Every action item must be assigned + tracked\n- Share widely for organizational learning", diff:"medium", tags:["process","leadership","incident"] },
+            { id:"sre10", q:"What Golden Signals would you monitor for a payment application?", a:"Google SRE Golden Signals:\n1. Latency — p50, p95, p99 for payment API\n2. Traffic — transactions per second\n3. Errors — failed payments, 5xx rate, payment gateway errors\n4. Saturation — DB connections, queue depth, thread pool\n\nAdditional for payments:\n- Success rate by payment method\n- Fraud detection trigger rate\n- 3rd-party gateway response time\n- Queue lag for async processing", diff:"medium", tags:["observability","monitoring","payments"] },
+          ]
+        },
+        cicd: {
+          label: "CI/CD Pipelines",
+          questions: [
+            { id:"cicd1", q:"A deployment pipeline suddenly starts failing after a new code merge. How would you identify the issue?", a:"1. Check pipeline logs for the failing stage\n2. Compare with the last passing pipeline run\n3. Review the merged code changes (git diff)\n4. Check if it's a test failure, build failure, or deploy failure\n5. Look for environment-specific issues (missing secrets, changed configs)\n6. Run pipeline locally or on a branch to isolate\n7. Check if infrastructure dependencies changed", diff:"medium", tags:["jenkins","gitlab","debugging"] },
+            { id:"cicd2", q:"How would you design a CI/CD pipeline for Infrastructure + Application deployment?", a:"Stages:\n1. Validate — lint, Terraform/Bicep validate\n2. Plan — terraform plan (manual approval gate)\n3. Apply Infra — deploy infrastructure\n4. Build App — Docker build, unit tests, push image\n5. Deploy App — deploy to Kubernetes/AKS\n6. Post-deploy — health checks, smoke tests, rollback on failure\n\nBest practices:\n- Separate infra pipeline from app pipeline\n- Store secrets in Vault / Key Vault\n- Use environment promotion (dev → staging → prod)\n- Add approval gates before prod", diff:"hard", tags:["jenkins","terraform","kubernetes","azure"] },
+            { id:"cicd3", q:"Your blue-green deployment failed during cutover. What rollback strategy would you use?", a:"Immediate:\n1. Keep old (blue) environment running — don't terminate it\n2. Re-point load balancer back to blue environment\n3. Verify blue is serving traffic correctly\n4. Communicate status to stakeholders\n\nPost-incident:\n- Investigate why green failed\n- Fix the issue in green\n- Re-test before next cutover attempt\n\nPreventive:\n- Automate smoke tests before LB switch\n- Use weighted routing for gradual rollout", diff:"hard", tags:["deployments","rollback","bluegreen"] },
+            { id:"cicd4", q:"A canary deployment shows increased error rates in the new version. Do you proceed or roll back?", a:"Decision framework:\n- Error rate above SLO threshold? → Rollback immediately\n- Error rate elevated but within tolerance? → Investigate before proceeding\n\nRollback steps:\n1. Reduce canary traffic to 0% (keep new pods running)\n2. Monitor error rate returns to baseline\n3. Collect logs and traces from canary pods\n4. Root cause before retrying\n\nKey metric: compare canary error rate vs baseline. A 2x increase is a red flag.", diff:"hard", tags:["canary","deployments","observability"] },
+            { id:"cicd5", q:"What Git strategy do you prefer for team workflows?", a:"Recommended: Trunk-Based Development with short-lived feature branches\n\nWorkflow:\n1. Create feature branch from main\n2. Open PR → mandatory code review\n3. CI pipeline runs on PR (lint, tests, security scan)\n4. Approval required before merge\n5. Delete branch after merge\n6. Main branch is always deployable\n\nAvoid: Direct commits to main, long-lived branches, no review process", diff:"easy", tags:["git","workflow","collaboration"] },
+            { id:"cicd6", q:"How do you secure secrets in CI/CD pipelines?", a:"✅ DO:\n- Store secrets in Azure Key Vault / HashiCorp Vault / AWS Secrets Manager\n- Use Managed Identity / IAM roles instead of static credentials\n- Reference secrets by name in pipeline YAML, never by value\n- Enable secret scanning on repositories\n- Rotate secrets automatically\n\n❌ DON'T:\n- Hardcode secrets in code or YAML\n- Log secrets (mask them in pipeline output)\n- Share secrets across environments\n- Commit .env files to Git", diff:"medium", tags:["security","secrets","devsecops"] },
+          ]
+        },
+        observability: {
+          label: "Observability",
+          questions: [
+            { id:"obs1", q:"Your logs are not appearing in the centralized logging platform. How would you debug?", a:"1. Verify log agent is running on the source host (Fluentd, Filebeat, etc.)\n2. Check agent logs for errors\n3. Verify network connectivity to log aggregator\n4. Check if log volume exceeds ingestion limits\n5. Verify the log path config matches actual log location\n6. Test manually: tail log file, verify agent picks it up\n7. Check receiving platform (ELK/Splunk) for ingest errors", diff:"medium", tags:["logging","elk","fluentd"] },
+            { id:"obs2", q:"How would you redesign monitoring to reduce dashboard noise?", a:"1. Audit existing alerts — remove stale/unused ones\n2. Set thresholds based on SLO baselines, not guesses\n3. Add alert deduplication (Alertmanager inhibition rules)\n4. Implement alert severity tiers: page-worthy vs ticket\n5. Use anomaly detection instead of static thresholds\n6. Create actionable dashboards — every panel should link to a runbook\n7. Regular review cadence: monthly alert audit", diff:"medium", tags:["monitoring","prometheus","grafana"] },
+            { id:"obs3", q:"A critical service is 'healthy' per monitoring but users report slowness. How do you reconcile?", a:"This is a synthetic vs real user monitoring gap.\n\nInvestigation:\n1. Check if health check only tests HTTP 200, not actual response time\n2. Look at RUM (Real User Monitoring) metrics\n3. Compare synthetic probe latency vs actual user latency\n4. Check for geographic performance differences\n5. Review CDN/edge caching effectiveness\n\nFix:\n- Add latency to health checks\n- Implement end-to-end synthetic monitoring\n- Use distributed tracing for user journeys", diff:"hard", tags:["monitoring","observability","rum"] },
+          ]
+        },
+        ha_dr: {
+          label: "HA & Disaster Recovery",
+          questions: [
+            { id:"ha1", q:"Design a highly available multi-region architecture for your application.", a:"Components:\n1. Multi-region deployment: primary + secondary regions\n2. Global load balancer: Route53 / Azure Front Door / GCP GLB\n3. Database: multi-region replication (RDS Multi-AZ + cross-region replica)\n4. Cache: Redis with replication\n5. Stateless app tier for easy failover\n6. Shared storage: S3 with cross-region replication\n\nFailover:\n- Active-Active: both regions serve traffic\n- Active-Passive: secondary on standby\n\nTest with regular DR drills!", diff:"hard", tags:["aws","azure","ha","architecture"] },
+            { id:"ha2", q:"Your organization wants RTO of 15 minutes and RPO of 5 minutes. How do you design the DR solution?", a:"RTO 15 min = recovery time, RPO 5 min = max data loss\n\nSolution:\n1. Database: synchronous replication to standby (near-zero RPO)\n2. Application: warm standby in secondary region (pre-scaled)\n3. DNS failover: TTL 60s, automated health-check-based failover\n4. Data backups: every 5 minutes to meet RPO\n5. Runbooks: fully automated failover scripts\n6. Regular DR drills: quarterly test to validate RTO\n\nTechnology: AWS RDS Multi-AZ, Route53 health checks, cross-region ECS clusters", diff:"hard", tags:["dr","aws","architecture","rto","rpo"] },
+          ]
+        },
+        networking: {
+          label: "Networking",
+          questions: [
+            { id:"net1", q:"DNS resolution for your application suddenly stops working. What steps do you take?", a:"1. Confirm issue: nslookup domain.com / dig domain.com\n2. Try alternate DNS server: dig @8.8.8.8 domain.com\n3. Check if DNS server is reachable\n4. Review recent DNS record changes\n5. Check TTL — cached old record?\n6. Verify DNS provider status\n7. Check /etc/resolv.conf on affected hosts\n8. Look for split-brain DNS issues", diff:"medium", tags:["dns","networking","troubleshooting"] },
+            { id:"net2", q:"SSL certificates expired for a production application. How do you handle the incident and prevent recurrence?", a:"Immediate:\n1. Issue new certificate from CA (Let's Encrypt / DigiCert)\n2. Deploy to web server / load balancer\n3. Verify with: openssl s_client -connect domain:443\n4. Communicate ETA to stakeholders\n\nPrevention:\n- Set calendar alerts at 60, 30, 14 days before expiry\n- Use certbot auto-renewal for Let's Encrypt\n- Monitor cert expiry with Prometheus ssl_cert_not_after metric\n- Use AWS ACM / Azure Key Vault for auto-renewal managed certs", diff:"medium", tags:["ssl","security","networking"] },
+          ]
+        },
+      }
+    },
+    technology: {
+      label: "Technology",
+      color: "#3ecf8e",
+      subcategories: {
+        linux: {
+          label: "Linux",
+          questions: [
+            { id:"lin1", q:"What are the most commonly used Linux commands for system administration?", a:"Process: ps aux, top, htop, kill, nice, renice\nDisk: df -h, du -sh, lsblk, fdisk, mount\nNetwork: netstat, ss, ip, ifconfig, ping, traceroute, curl\nFiles: ls, find, grep, sed, awk, chmod, chown, ln\nServices: systemctl, service, journalctl\nHardware: lscpu, lsmem, lspci, lsblk, dmesg\nPackages: apt/yum install/remove/update", diff:"easy", tags:["linux","commands","admin"] },
+            { id:"lin2", q:"Explain how the Linux boot process works from power-on to login prompt.", a:"1. BIOS POST — hardware self-test\n2. Boot Loader (GRUB2) — loads kernel from /boot\n3. Kernel Initialization — decompresses, initializes hardware & memory\n4. INIT / systemd — starts services, mounts filesystems\n5. Login prompt (getty)\n\nKey systemd targets:\n- poweroff.target (runlevel 0)\n- rescue.target (runlevel 1)\n- multi-user.target (runlevel 3)\n- graphical.target (runlevel 5)", diff:"medium", tags:["linux","boot","systemd"] },
+            { id:"lin3", q:"What are the different Linux file types and how do you identify them?", a:"Regular files: text, scripts, binaries, config files\nDirectories: folders\nSymbolic links: shortcuts to other files (soft link)\nHard links: multiple names pointing to same inode\nCharacter devices: /dev — serial IO (keyboard, mouse)\nBlock devices: /dev — disk, RAM\nSocket files: inter-process communication\nNamed pipes (FIFO): unidirectional process-to-process\n\nIdentify with: file <name> or ls -la (first char: -, d, l, c, b, s, p)", diff:"easy", tags:["linux","filesystem","files"] },
+            { id:"lin4", q:"How do you manage user accounts and permissions in Linux?", a:"User management:\nuseradd -m username   # create user with home dir\npasswd username        # set password\nusermod -aG sudo user  # add to group\nuserdel -r username    # delete user + home\n\nPermissions (chmod):\nchmod 755 file    # rwxr-xr-x\nchmod 644 file    # rw-r--r--\nchown user:group file\n\nSpecial bits:\nSUID (4xxx): run as owner\nSGID (2xxx): run as group\nSticky (1xxx): only owner can delete (e.g., /tmp)", diff:"medium", tags:["linux","permissions","users"] },
+            { id:"lin5", q:"How do you monitor disk, CPU, and memory usage on a Linux server?", a:"Disk:\ndf -h                  # filesystem usage\ndu -sh /var/log         # directory size\niostat -x 1            # I/O stats\n\nCPU:\ntop / htop             # interactive\nsar -u 1 5             # CPU util over time\nmpstat -P ALL 1        # per-core stats\n\nMemory:\nfree -h                # RAM and swap\ncat /proc/meminfo      # detailed memory\nvmstat 1               # memory + swap activity\n\nAll-in-one: glances, nmon", diff:"easy", tags:["linux","monitoring","performance"] },
+            { id:"lin6", q:"Explain Linux runlevels and systemd targets.", a:"Runlevel → systemd target mapping:\n0 → poweroff.target\n1 → rescue.target\n2,3,4 → multi-user.target\n5 → graphical.target\n6 → reboot.target\n\nUseful commands:\nsystemctl get-default\nsystemctl set-default multi-user.target\nsystemctl isolate rescue.target\n\nNote: runlevels are a SysV concept; systemd uses targets instead. Both are supported for compatibility.", diff:"easy", tags:["linux","systemd","boot"] },
+          ]
+        },
+        kubernetes: {
+          label: "Kubernetes",
+          questions: [
+            { id:"k8s1", q:"Explain Kubernetes architecture and core components.", a:"Control Plane:\n- API Server: all cluster communication hub\n- etcd: distributed key-value store (cluster state)\n- Scheduler: assigns pods to nodes\n- Controller Manager: runs controllers (replication, endpoint, etc.)\n\nData Plane (Node):\n- kubelet: agent on each node, manages pods\n- kube-proxy: network rules for service routing\n- Container Runtime: Docker/containerd/CRI-O\n\nKey resources:\nPod → Deployment → ReplicaSet\nService (ClusterIP, NodePort, LoadBalancer)\nIngress, ConfigMap, Secret, PVC", diff:"medium", tags:["kubernetes","architecture"] },
+            { id:"k8s2", q:"How do you handle pods getting OOMKilled repeatedly in production?", a:"OOMKilled = container exceeded memory limit\n\nDiagnose:\nkubectl describe pod <name> | grep -A5 OOMKilled\nkubectl top pods\n\nFix:\n1. Increase memory limit in deployment spec\n2. Profile app for memory leaks\n3. Set proper resource requests (helps scheduler place pods)\n\nBest practice:\nrequests: memory: 256Mi  # guaranteed\nlimits: memory: 512Mi    # max allowed\n\nAvoid: setting limits too low or equal to requests without profiling", diff:"medium", tags:["kubernetes","memory","resources"] },
+            { id:"k8s3", q:"Your cluster autoscaler is not adding new nodes even though pods are pending. How do you troubleshoot?", a:"Check why pods are pending:\nkubectl describe pod <pending-pod> | grep Events\n\nCommon reasons autoscaler doesn't trigger:\n1. Pod has unsatisfiable node affinity/taint rules\n2. Max node count already reached\n3. Pod requests are too large for any node type\n4. Autoscaler is disabled or misconfigured\n5. Cloud provider quota limit hit\n\nCheck autoscaler logs:\nkubectl -n kube-system logs deployment/cluster-autoscaler\n\nFix: Adjust node group max size, fix pod affinity, or add larger node types", diff:"hard", tags:["kubernetes","autoscaling","troubleshooting"] },
+            { id:"k8s4", q:"When would you choose AKS vs Container Apps vs Container Instances in Azure?", a:"AKS (Azure Kubernetes Service):\n- Full Kubernetes control\n- Complex microservices\n- Need custom networking, RBAC, storage\n- 10+ services\n\nContainer Apps (Serverless Kubernetes):\n- Less ops overhead\n- Event-driven / HTTP workloads\n- KEDA-based autoscaling\n- Simpler apps\n\nContainer Instances (ACI):\n- Short-lived batch jobs\n- Quick demos\n- No orchestration needed\n\nRule of thumb: Default to Container Apps for new apps; AKS when you need full control.", diff:"medium", tags:["azure","kubernetes","aks","containers"] },
+          ]
+        },
+        docker: {
+          label: "Docker",
+          questions: [
+            { id:"dock1", q:"What is the difference between a Docker image and a container?", a:"Image: read-only template with app code, runtime, libraries, config\n- Built from Dockerfile\n- Stored in registry (Docker Hub, ECR, ACR)\n- Immutable\n\nContainer: running instance of an image\n- Has writable layer on top of image\n- Ephemeral by default\n- Has its own process namespace\n\nAnalogy: Image = class definition, Container = object instance", diff:"easy", tags:["docker","containers","basics"] },
+            { id:"dock2", q:"How do you write an optimized Dockerfile for a production application?", a:"Best practices:\n1. Use official base images (node:18-alpine not ubuntu)\n2. Multi-stage builds to reduce image size\n3. Order layers: rarely changed → frequently changed\n4. Use .dockerignore to exclude node_modules, .git\n5. Run as non-root user\n6. Don't store secrets in image layers\n\nExample multi-stage:\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm build\n\nFROM node:18-alpine\nCOPY --from=builder /app/dist ./dist\nCMD [\"node\", \"dist/index.js\"]", diff:"medium", tags:["docker","dockerfile","optimization"] },
+          ]
+        },
+        terraform: {
+          label: "Terraform / IaC",
+          questions: [
+            { id:"tf1", q:"What happens if the Terraform state file is accidentally deleted?", a:"Impact:\n- Terraform loses track of all managed resources\n- Next terraform apply may try to CREATE everything again\n- Could result in duplicate or conflicting resources\n\nPrevention (must-have):\n1. Store state in remote backend: Azure Storage / S3 + DynamoDB\n2. Enable state locking (prevents concurrent runs)\n3. Enable versioning on storage bucket\n4. Enable soft delete / backup\n\nRecovery if deleted:\n- Use terraform import to re-import existing resources\n- If versioned backend: restore previous state version", diff:"hard", tags:["terraform","iac","statefile"] },
+            { id:"tf2", q:"What's the difference between writing Terraform for one project vs building it as a platform capability?", a:"One-project IaC:\n- Tightly coupled to specific app\n- Not reusable\n- No versioning needed\n\nPlatform IaC (treat as a product):\n- Modular: VNet module, AKS module, KeyVault module\n- Versioned: v1.0.0, v2.0.0\n- Standard inputs/outputs defined\n- Documented with examples\n- Backward compatible changes\n- Published to module registry\n\nTeams consume: module 'vnet' { source = 'registry/vnet' version = '~>2.0' }\n\nKey idea: Platform team owns modules; app teams consume them.", diff:"medium", tags:["terraform","platform","iac"] },
+            { id:"tf3", q:"Multiple teams are modifying shared Terraform modules causing instability. What do you do?", a:"1. Introduce module versioning: pin to specific versions\n2. Create a release process: PR → review → tag → release\n3. Separate repositories: core-platform-modules (platform team) vs team-specific Terraform\n4. Change approval: breaking changes require RFC process\n5. Automated testing: Terratest or checkov\n6. Changelog maintenance\n\nGovernance model:\n- Platform team owns module source\n- App teams open PRs for changes\n- No direct commits to main\n- Major version bumps require migration guide", diff:"hard", tags:["terraform","governance","platform"] },
+          ]
+        },
+        git: {
+          label: "Git",
+          questions: [
+            { id:"git1", q:"A developer accidentally commits secrets into a Git repository. What do you do immediately?", a:"Immediate (within minutes):\n1. Assume secrets are compromised — rotate/revoke NOW\n2. Remove from remote: git filter-branch or BFG Repo Cleaner\n3. Force push to overwrite history\n4. Invalidate all GitHub tokens referencing this repo\n5. Notify security team\n\nNote: GitHub caches commits — even after force push, secrets may be in cache.\n\nPrevention:\n- Pre-commit hooks: gitleaks, detect-secrets\n- GitHub Advanced Security secret scanning\n- Never store secrets in code — use Vault/Key Vault", diff:"hard", tags:["git","security","secrets"] },
+            { id:"git2", q:"Explain Git branching strategies used in professional environments.", a:"GitFlow:\n- main (production), develop, feature/*, release/*, hotfix/*\n- Good for versioned releases\n- Complex, lots of merging\n\nTrunk-Based Development:\n- Everyone works off main with short-lived branches\n- Feature flags for incomplete features\n- Simpler, faster CI/CD\n- Preferred for SaaS products\n\nGitHub Flow:\n- main + feature branches + PRs\n- Simpler than GitFlow\n- Good for continuous deployment\n\nRecommendation: Trunk-based for modern DevOps teams", diff:"medium", tags:["git","branching","workflow"] },
+          ]
+        },
+      }
+    },
+    organization: {
+      label: "Organizations",
+      color: "#c47af5",
+      subcategories: {
+        freshworks: {
+          label: "Freshworks",
+          questions: [
+            { id:"fw1", q:"What scripting languages have you used for DevOps automation and how do you integrate scripts with CI/CD pipelines?", a:"Languages: Python (primary), Bash, Go\n\nPython for DevOps:\n- subprocess module to run shell commands\n- requests for API automation\n- boto3 / azure-sdk for cloud operations\n- File handling for config generation\n\nIntegration with CI/CD:\n- Scripts called as pipeline steps\n- Environment variables passed from pipeline secrets\n- Scripts output JSON for pipeline parsing\n- Unit test scripts with pytest before merging\n\nExample: Python script to check deployment health, called as post-deploy step in Jenkins", diff:"medium", tags:["freshworks","python","scripting","cicd"] },
+            { id:"fw2", q:"Describe your experience designing CI/CD pipelines from scratch at Freshworks scale.", a:"Pipeline design:\n1. Source: Git push triggers pipeline\n2. Build: Docker image build + unit tests\n3. Test: Integration tests in isolated environment\n4. Security: SAST scan, dependency check\n5. Push: Image to registry with git-sha tag\n6. Deploy: Kubernetes rolling update\n7. Verify: Smoke tests, health checks\n8. Notify: Slack/email on success/failure\n\nTools: Jenkins + Kubernetes agents\nKey decision: Each service has its own pipeline\nImmutable deployments: never update running containers, always replace", diff:"hard", tags:["freshworks","cicd","jenkins","kubernetes"] },
+            { id:"fw3", q:"How do you monitor disk space, CPU, and memory in a large Linux fleet?", a:"Agent-based:\n- Node Exporter (Prometheus) on each server\n- Metrics scraped by Prometheus\n- Grafana dashboards for fleet view\n\nAlerts:\n- disk_free_percent < 20% → warning\n- disk_free_percent < 10% → critical\n- cpu_usage > 85% for 5m → warning\n- memory_available < 10% → critical\n\nAutomation:\n- Auto-cleanup scripts triggered by alert\n- Ansible playbooks for bulk remediation\n- Capacity planning reports weekly", diff:"medium", tags:["freshworks","linux","monitoring","prometheus"] },
+            { id:"fw4", q:"Describe a complex Kubernetes troubleshooting issue you resolved.", a:"Scenario: Pods randomly restarting with no CrashLoopBackOff, just OOMKilled at 2 AM\n\nSteps:\n1. kubectl describe pod — confirmed OOMKilled\n2. Metrics showed memory spike at midnight\n3. Correlated with cron job running ETL process\n4. ETL was loading entire dataset into memory\n5. Fix: paginate ETL query, process in batches\n6. Added memory limit from 256Mi → 512Mi as immediate fix\n7. Long-term: profiled ETL, reduced memory footprint 60%\n\nLesson: Resource limits need to be based on actual usage profiling, not guesses", diff:"hard", tags:["freshworks","kubernetes","debugging","memory"] },
+          ]
+        },
+        husky: {
+          label: "Husky",
+          questions: [
+            { id:"hk1", q:"How would you design a centralized Azure platform for multiple teams deploying applications?", a:"Platform Engineering Model:\n\n1. Landing Zone architecture:\n   - Management groups: root → platform → workloads\n   - Subscriptions per team/environment\n   \n2. Reusable IaC modules (Terraform/Bicep):\n   - VNet, AKS, Key Vault, App Service modules\n   \n3. Governance:\n   - Azure Policies: naming, tagging, allowed regions\n   - RBAC: least privilege per team\n   \n4. Self-service via CI/CD:\n   - Teams request infra via PR to IaC repo\n   - Pipeline validates + deploys with approval\n   \n5. Shared services:\n   - Hub-spoke networking\n   - Centralized logging (Log Analytics)\n   - Shared ACR for container images\n\nGoal: Dev teams consume platform, not build infra from scratch", diff:"hard", tags:["husky","azure","platform","architecture"] },
+            { id:"hk2", q:"An AKS application suddenly becomes unreachable. Walk through your troubleshooting steps.", a:"Step-by-step:\n1. kubectl get pods -n <namespace> — any CrashLoopBackOff?\n2. kubectl describe pod <name> — check Events\n3. kubectl logs <pod> — application errors?\n4. kubectl get svc — is LoadBalancer IP assigned?\n5. kubectl get ingress — ingress rules correct?\n6. Test DNS: nslookup app.domain.com\n7. Azure side:\n   - Check NSG rules blocking LB traffic\n   - Verify Azure LB health probe status\n   - Check AKS node health\n8. If infra issue: check recent Terraform changes\n\nMnemonic: Pod → Service → Ingress → DNS → Azure Network", diff:"hard", tags:["husky","azure","aks","troubleshooting"] },
+            { id:"hk3", q:"How do you improve developer experience in platform engineering?", a:"Key initiatives:\n1. Self-service templates: developers scaffold new services without platform team\n2. Automated deployments: push to branch = auto-deploy to dev\n3. Reduce friction: eliminate manual approval steps in non-prod\n4. Documentation: up-to-date runbooks, ADRs, onboarding guide\n5. Inner developer portal: Backstage or Azure DevCenter\n6. Fast feedback loops: pipeline < 10 minutes\n7. Standardize: one way to do logging, monitoring, deployment\n\nMetrics to track:\n- DORA metrics: deploy frequency, lead time, MTTR, change failure rate\n- Developer satisfaction surveys", diff:"medium", tags:["husky","platform","devex","devops"] },
+            { id:"hk4", q:"How do you handle failed deployments and implement rollback strategy?", a:"Prevention:\n- Blue-green: keep old version live until new one verified\n- Canary: gradual traffic shift with automatic abort\n- Health checks: readiness probes before LB switch\n\nRollback options:\n1. Kubernetes: kubectl rollout undo deployment/<name>\n2. Helm: helm rollback <release> <revision>\n3. Terraform: restore previous state version, re-apply\n4. Pipeline: trigger previous successful deployment\n\nAzure-specific:\n- AKS: use deployment slots for zero-downtime\n- Function Apps: use deployment slots\n\nBest practice: Every deployment must have an automated rollback plan defined before merge.", diff:"hard", tags:["husky","azure","deployment","rollback"] },
+          ]
+        },
+        andersen: {
+          label: "Andersen",
+          questions: [
+            { id:"and1", q:"What cloud platforms have you worked with and how do you manage IaC in cloud environments?", a:"Platforms: AWS, Azure (primary), GCP (exposure)\n\nAWS IaC:\n- Terraform for multi-service provisioning\n- CloudFormation for AWS-native templates\n- CDK for programmatic infrastructure\n\nAzure IaC:\n- Terraform + AzureRM provider\n- Bicep for Azure-native\n- ARM templates (legacy)\n\nIaC best practices:\n- Remote state with locking\n- Modules for reusability\n- Separate state per environment\n- Plan before apply\n- Drift detection in CI/CD", diff:"medium", tags:["andersen","aws","azure","terraform"] },
+            { id:"and2", q:"How do you handle security and compliance in cloud deployments?", a:"Identity & Access:\n- IAM least privilege: no wildcard permissions\n- MFA for all human users\n- Service accounts with minimal scope\n- Managed Identity over static credentials\n\nNetwork:\n- VPC/VNet isolation\n- Security groups: deny-by-default\n- Private endpoints for PaaS services\n- WAF for public-facing apps\n\nData:\n- Encrypt at rest (KMS/Key Vault)\n- Encrypt in transit (TLS 1.2+)\n- Secrets in Vault, not env vars\n\nCompliance:\n- AWS Config / Azure Policy for drift detection\n- Security Hub / Defender for Cloud\n- Regular penetration testing", diff:"hard", tags:["andersen","security","compliance","cloud"] },
+          ]
+        },
+      }
+    },
+    coding: {
+      label: "Coding Round",
+      color: "#f5c842",
+      subcategories: {
+        python: {
+          label: "Python / Scripting",
+          questions: [
+            { id:"py1", q:"How do data structures and algorithms influence your scripting and automation tasks?", a:"Common patterns in DevOps scripts:\n\nArrays/Lists: processing log lines, server lists\nDictionaries/HashMaps: O(1) lookup for server configs, metric aggregation\nSets: deduplication (unique IPs, unique errors)\nQueues: processing events in order\n\nAlgorithm patterns:\n- Frequency count: counting error types in logs\n- Sliding window: detecting anomalies over time windows\n- Binary search: finding config values efficiently\n- Graph traversal: dependency resolution\n\nExample: Log analysis script uses dict for O(n) frequency counting instead of nested loops O(n²)", diff:"medium", tags:["python","algorithms","scripting"] },
+            { id:"py2", q:"How do you handle error handling and exceptions in automation scripts?", a:"Python best practices:\n\ntry:\n    result = risky_operation()\nexcept SpecificError as e:\n    logger.error(f'Specific error: {e}')\n    handle_gracefully()\nexcept Exception as e:\n    logger.critical(f'Unexpected: {e}')\n    raise  # re-raise unexpected errors\nfinally:\n    cleanup_resources()\n\nPrinciples:\n- Catch specific exceptions, not bare except:\n- Log error context (what was being done)\n- Fail fast vs retry logic (with exponential backoff)\n- Return meaningful exit codes\n- Always clean up resources (context managers)\n- Unit test error paths, not just happy path", diff:"medium", tags:["python","error-handling","scripting"] },
+          ]
+        },
+        arrays: {
+          label: "DSA Basics",
+          questions: [
+            { id:"dsa1", q:"What coding patterns should a DevOps engineer know for coding rounds?", a:"Priority patterns for DevOps coding rounds:\n\n1. Frequency Count (dict/hashmap)\n   - Most common in log analysis questions\n   - O(n) time complexity\n\n2. Two Pointers\n   - Sorted array problems\n   - Efficient without extra space\n\n3. Sliding Window\n   - Subarray/substring problems\n   - Time-series analysis\n\n4. String manipulation\n   - Log parsing, config file processing\n   - regex, split, join\n\n5. Sorting\n   - Leaderboard, priority problems\n\nFocus: Show clean, readable code. DevOps interviewers value maintainability over cleverness.", diff:"easy", tags:["coding","algorithms","interview"] },
+          ]
+        }
+      }
+    }
+  }
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  data: null,
+  activeCategory: null,
+  activeTopic: null,
+  diffFilter: 'all',
+  searchQuery: '',
+  showReviewed: false,
+  showBookmarked: false,
+  reviewed: {},
+  bookmarked: {},
+  notes: {},
+  editingId: null,
+  theme: 'dark',
+};
+
+// ═══════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════
+function saveState() {
+  try {
+    localStorage.setItem('prepkit_data', JSON.stringify(state.data));
+    localStorage.setItem('prepkit_reviewed', JSON.stringify(state.reviewed));
+    localStorage.setItem('prepkit_bookmarked', JSON.stringify(state.bookmarked));
+    localStorage.setItem('prepkit_notes', JSON.stringify(state.notes));
+    localStorage.setItem('prepkit_theme', state.theme);
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const d = localStorage.getItem('prepkit_data');
+    state.data = d ? JSON.parse(d) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+    const r = localStorage.getItem('prepkit_reviewed');
+    state.reviewed = r ? JSON.parse(r) : {};
+    const b = localStorage.getItem('prepkit_bookmarked');
+    state.bookmarked = b ? JSON.parse(b) : {};
+    const n = localStorage.getItem('prepkit_notes');
+    state.notes = n ? JSON.parse(n) : {};
+    state.theme = localStorage.getItem('prepkit_theme') || 'dark';
+  } catch(e) {
+    state.data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    state.reviewed = {}; state.bookmarked = {}; state.notes = {};
+  }
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function getAllQuestions() {
+  const all = [];
+  for (const [catKey, cat] of Object.entries(state.data.categories)) {
+    for (const [topicKey, topic] of Object.entries(cat.subcategories)) {
+      for (const q of topic.questions) {
+        all.push({ ...q, _cat: catKey, _topic: topicKey, _catLabel: cat.label, _topicLabel: topic.label });
+      }
+    }
+  }
+  return all;
+}
+
+function getFilteredQuestions() {
+  let qs = getAllQuestions();
+  if (state.activeCategory && state.activeTopic) {
+    qs = qs.filter(q => q._cat === state.activeCategory && q._topic === state.activeTopic);
+  } else if (state.activeCategory) {
+    qs = qs.filter(q => q._cat === state.activeCategory);
+  }
+  if (state.diffFilter !== 'all') qs = qs.filter(q => q.diff === state.diffFilter);
+  if (state.showReviewed) qs = qs.filter(q => state.reviewed[q.id]);
+  if (state.showBookmarked) qs = qs.filter(q => state.bookmarked[q.id]);
+  if (state.searchQuery.trim()) {
+    const sq = state.searchQuery.toLowerCase();
+    qs = qs.filter(q =>
+      q.q.toLowerCase().includes(sq) ||
+      (q.a && q.a.toLowerCase().includes(sq)) ||
+      (q.tags && q.tags.some(t => t.includes(sq))) ||
+      q._topicLabel.toLowerCase().includes(sq)
+    );
+  }
+  return qs;
+}
+
+function highlightText(text, query) {
+  if (!query.trim()) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const regex = new RegExp(`(${escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return escaped.replace(regex, '<mark class="highlight">$1</mark>');
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatAnswer(text) {
+  if (!text) return '<p>No answer provided.</p>';
+  const lines = text.split('\n');
+  let html = '', inPre = false;
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { if (!inPre) html += ''; continue; }
+    if (/^(#|Step|Note|Immediate|Prevention|Fix|Best practice|Example)/.test(trimmed) && !inPre) {
+      html += `<p><strong>${escapeHtml(trimmed)}</strong></p>`;
+    } else if (/^[-●•✅❌]/.test(trimmed) || /^\d+\./.test(trimmed)) {
+      html += `<li>${escapeHtml(trimmed.replace(/^[-●•✅❌]\s*/,'').replace(/^\d+\.\s*/,''))}</li>`;
+    } else if (trimmed.includes('kubectl') || trimmed.includes('apt') || trimmed.includes('sudo') || trimmed.startsWith('FROM') || trimmed.startsWith('COPY') || trimmed.startsWith('RUN')) {
+      html += `<code>${escapeHtml(trimmed)}</code><br>`;
+    } else {
+      html += `<p>${escapeHtml(trimmed)}</p>`;
+    }
+  }
+  return html;
+}
+
+function genId() {
+  return 'q_' + Math.random().toString(36).substr(2, 9);
+}
+
+// ═══════════════════════════════════════════
+//  RENDER SIDEBAR
+// ═══════════════════════════════════════════
+function renderSidebar() {
+  const filter = document.getElementById('sidebar-search').value.toLowerCase();
+  const body = document.getElementById('sidebar-body');
+  let html = '';
+
+  // All
+  html += `<div class="nav-item${!state.activeCategory ? ' active' : ''}" data-cat="" data-topic="">
+    <span class="nav-dot" style="background:#5b8af5"></span>
+    All Questions
+    <span class="nav-count">${getAllQuestions().length}</span>
+  </div>`;
+
+  for (const [catKey, cat] of Object.entries(state.data.categories)) {
+    const catFiltered = cat.label.toLowerCase().includes(filter);
+    const subKeys = Object.keys(cat.subcategories).filter(sk =>
+      catFiltered || cat.subcategories[sk].label.toLowerCase().includes(filter)
+    );
+    if (!catFiltered && subKeys.length === 0) continue;
+
+    const isOpen = state.activeCategory === catKey || filter;
+    const totalCat = Object.values(cat.subcategories).reduce((s, t) => s + t.questions.length, 0);
+    html += `<div class="nav-section">
+      <div class="nav-section-header ${isOpen ? 'open' : ''}" data-section="${catKey}">
+        <span>${cat.label}</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:var(--text3)">${totalCat}</span>
+          <i class="chevron">›</i>
+        </span>
+      </div>
+      <div class="nav-items ${isOpen ? 'open' : ''}">
+        ${subKeys.map(sk => {
+          const topic = cat.subcategories[sk];
+          const isActive = state.activeCategory === catKey && state.activeTopic === sk;
+          const deleteBtn = catKey === 'organization' ? `<button class="delete-company-btn" data-key="${sk}" style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;margin-left:auto;">×</button>` : '';
+          return `<div class="nav-item${isActive ? ' active' : ''}" data-cat="${catKey}" data-topic="${sk}">
+            <span class="nav-dot" style="background:${cat.color}"></span>
+            ${topic.label}
+            <span class="nav-count">${topic.questions.length}</span>
+            ${deleteBtn}
+          </div>`;
+        }).join('')}
+        ${catKey === 'organization' ? `<button class="add-company-btn" data-cat="${catKey}">+ Add Company</button>` : ''}
+      </div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+
+  // Events
+  body.querySelectorAll('.nav-section-header').forEach(el => {
+    el.addEventListener('click', () => {
+      el.classList.toggle('open');
+      const items = el.nextElementSibling;
+      items.classList.toggle('open');
+    });
+  });
+  body.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      state.activeCategory = el.dataset.cat || null;
+      state.activeTopic = el.dataset.topic || null;
+      render();
+    });
+  });
+  body.querySelectorAll('.add-company-btn').forEach(el => {
+    el.addEventListener('click', () => {
+      const companyName = prompt('Enter company name:');
+      if (companyName && companyName.trim()) {
+        const key = companyName.toLowerCase().replace(/\s+/g, '');
+        if (!state.data.categories.organization.subcategories[key]) {
+          state.data.categories.organization.subcategories[key] = {
+            label: companyName.trim(),
+            questions: []
+          };
+          localStorage.setItem('prepkit_data', JSON.stringify(state.data));
+          render();
+        } else {
+          alert('Company already exists!');
+        }
+      }
+    });
+  });
+  body.querySelectorAll('.delete-company-btn').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent triggering nav-item click
+      const key = el.dataset.key;
+      if (confirm(`Delete company "${state.data.categories.organization.subcategories[key].label}"?`)) {
+        delete state.data.categories.organization.subcategories[key];
+        localStorage.setItem('prepkit_data', JSON.stringify(state.data));
+        render();
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER TOPBAR TABS
+// ═══════════════════════════════════════════
+function renderTopbarTabs() {
+  const tabsEl = document.getElementById('topbar-tabs');
+  const bcCat = document.getElementById('bc-cat');
+  const bcTopic = document.getElementById('bc-topic');
+
+  if (!state.activeCategory) {
+    bcCat.textContent = 'All'; bcTopic.textContent = 'Questions';
+    tabsEl.innerHTML = '';
+    return;
+  }
+
+  const cat = state.data.categories[state.activeCategory];
+  bcCat.textContent = cat.label;
+  bcTopic.textContent = state.activeTopic ? cat.subcategories[state.activeTopic]?.label : 'All Topics';
+
+  const tabs = Object.entries(cat.subcategories).map(([k, v]) =>
+    `<button class="tab-btn${state.activeTopic === k ? ' active' : ''}" data-topic="${k}">${v.label}</button>`
+  ).join('');
+  tabsEl.innerHTML = `<button class="tab-btn${!state.activeTopic ? ' active' : ''}" data-topic="">All</button>${tabs}`;
+
+  tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeTopic = btn.dataset.topic || null;
+      render();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER STATS
+// ═══════════════════════════════════════════
+function renderStats() {
+  const all = getAllQuestions();
+  const visible = getFilteredQuestions();
+  const reviewedCount = visible.filter(q => state.reviewed[q.id]).length;
+  const bookmarkedCount = all.filter(q => state.bookmarked[q.id]).length;
+  const pct = visible.length ? Math.round(reviewedCount / visible.length * 100) : 0;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Questions</div>
+      <div class="stat-val" style="color:var(--accent)">${all.length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Showing</div>
+      <div class="stat-val" style="color:var(--text2)">${visible.length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Reviewed</div>
+      <div class="stat-val" style="color:var(--green)">${reviewedCount}</div>
+      <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bookmarked</div>
+      <div class="stat-val" style="color:var(--yellow)">${bookmarkedCount}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Progress</div>
+      <div class="stat-val" style="color:var(--purple)">${pct}%</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER QUESTIONS
+// ═══════════════════════════════════════════
+function renderQuestions() {
+  const qs = getFilteredQuestions();
+  const sq = state.searchQuery;
+  const container = document.getElementById('q-list');
+
+  if (qs.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="emoji">🔍</div>
+      <p>No questions found</p>
+      <small>Try adjusting your filters or <button onclick="document.getElementById('btn-add').click()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px">add a new question</button></small>
+    </div>`;
+    return;
+  }
+
+  // Group by topic if showing multiple topics
+  let grouped = {};
+  for (const q of qs) {
+    const key = `${q._catLabel} › ${q._topicLabel}`;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(q);
+  }
+
+  const sections = Object.entries(grouped);
+  let html = '';
+
+  for (const [section, questions] of sections) {
+    if (sections.length > 1) {
+      html += `<div class="section-heading">
+        <h2>${escapeHtml(section)}</h2>
+        <span class="q-count">${questions.length} questions</span>
+      </div>`;
+    }
+    questions.forEach((q, i) => {
+      const isReviewed = !!state.reviewed[q.id];
+      const isBookmarked = !!state.bookmarked[q.id];
+      const classes = ['q-card', isReviewed ? 'reviewed' : '', isBookmarked ? 'bookmarked' : ''].filter(Boolean).join(' ');
+      const qText = highlightText(q.q, sq);
+      const tags = [
+        `<span class="tag tag-${q.diff}">${q.diff}</span>`,
+        `<span class="tag tag-topic">${escapeHtml(q._topicLabel)}</span>`,
+        ...((q.tags || []).map(t => `<span class="tag tag-scenario">${escapeHtml(t)}</span>`))
+      ].join('');
+
+      html += `<div class="${classes}" data-id="${q.id}" style="animation-delay:${i*0.03}s">
+        <div class="q-header">
+          <span class="q-num">#${String(i+1).padStart(2,'0')}</span>
+          <div style="flex:1">
+            <div class="q-text">${qText}</div>
+            <div class="q-meta">${tags}</div>
+          </div>
+          <div class="q-actions">
+            <button class="qa-btn ${isReviewed ? 'on-review' : ''}" data-action="review" data-id="${q.id}" title="Mark as reviewed">✓</button>
+            <button class="qa-btn ${isBookmarked ? 'on-bookmark' : ''}" data-action="bookmark" data-id="${q.id}" title="Bookmark">★</button>
+            <button class="qa-btn" data-action="edit" data-id="${q.id}" title="Edit">✎</button>
+            <button class="qa-btn" data-action="delete" data-id="${q.id}" title="Delete" style="color:var(--text3)">✕</button>
+            <span class="chevron-q">▾</span>
+          </div>
+        </div>
+        <div class="q-answer">
+          <div class="q-answer-inner">
+            ${formatAnswer(q.a)}
+            <div class="note-area">
+              <span class="note-label">MY NOTES</span>
+              <textarea placeholder="Add personal notes, reminders, or context…" data-note-id="${q.id}">${escapeHtml(state.notes[q.id] || '')}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  container.innerHTML = html;
+
+  // Accordion
+  container.querySelectorAll('.q-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      if (e.target.closest('.qa-btn')) return;
+      const card = header.closest('.q-card');
+      container.querySelectorAll('.q-card.open').forEach(c => { if (c !== card) c.classList.remove('open'); });
+      card.classList.toggle('open');
+    });
+  });
+
+  // Action buttons
+  container.querySelectorAll('.qa-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const { action, id } = btn.dataset;
+      if (action === 'review') { state.reviewed[id] = !state.reviewed[id]; saveState(); render(); }
+      else if (action === 'bookmark') { state.bookmarked[id] = !state.bookmarked[id]; saveState(); render(); }
+      else if (action === 'edit') { openEditModal(id); }
+      else if (action === 'delete') { if (confirm('Delete this question?')) { deleteQuestion(id); } }
+    });
+  });
+
+  // Notes
+  container.querySelectorAll('textarea[data-note-id]').forEach(ta => {
+    ta.addEventListener('input', () => {
+      state.notes[ta.dataset.noteId] = ta.value;
+      saveState();
+    });
+    ta.addEventListener('click', e => e.stopPropagation());
+  });
+}
+
+// ═══════════════════════════════════════════
+//  FULL RENDER
+// ═══════════════════════════════════════════
+function render() {
+  renderSidebar();
+  renderTopbarTabs();
+  renderStats();
+  renderQuestions();
+}
+
+// ═══════════════════════════════════════════
+//  MODAL — ADD / EDIT
+// ═══════════════════════════════════════════
+function populateFormSelects(catVal, topicVal) {
+  const catSel = document.getElementById('f-category');
+  const topicSel = document.getElementById('f-topic');
+  catSel.innerHTML = Object.entries(state.data.categories)
+    .map(([k, v]) => `<option value="${k}" ${k === catVal ? 'selected' : ''}>${v.label}</option>`)
+    .join('');
+  updateTopicSelect(catSel.value, topicVal);
+  catSel.addEventListener('change', () => updateTopicSelect(catSel.value, null));
+}
+
+function updateTopicSelect(catKey, topicVal) {
+  const cat = state.data.categories[catKey];
+  if (!cat) return;
+  document.getElementById('f-topic').innerHTML = Object.entries(cat.subcategories)
+    .map(([k, v]) => `<option value="${k}" ${k === topicVal ? 'selected' : ''}>${v.label}</option>`)
+    .join('');
+}
+
+function openAddModal() {
+  state.editingId = null;
+  document.getElementById('modal-title').textContent = 'Add Question';
+  document.getElementById('f-question').value = '';
+  document.getElementById('f-answer').value = '';
+  document.getElementById('f-tags').value = '';
+  document.getElementById('f-difficulty').value = 'medium';
+  document.getElementById('edit-id').value = '';
+  populateFormSelects(state.activeCategory || 'topics', state.activeTopic || 'sre');
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const all = getAllQuestions();
+  const q = all.find(x => x.id === id);
+  if (!q) return;
+  state.editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Question';
+  document.getElementById('f-question').value = q.q;
+  document.getElementById('f-answer').value = q.a || '';
+  document.getElementById('f-tags').value = (q.tags || []).join(', ');
+  document.getElementById('f-difficulty').value = q.diff || 'medium';
+  document.getElementById('edit-id').value = id;
+  populateFormSelects(q._cat, q._topic);
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveQuestion() {
+  const q = document.getElementById('f-question').value.trim();
+  if (!q) { alert('Question is required'); return; }
+  const catKey = document.getElementById('f-category').value;
+  const topicKey = document.getElementById('f-topic').value;
+  const tags = document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const diff = document.getElementById('f-difficulty').value;
+  const answer = document.getElementById('f-answer').value.trim();
+  const id = state.editingId || genId();
+
+  const newQ = { id, q, a: answer, diff, tags };
+
+  if (state.editingId) {
+    // Find and replace
+    const questions = state.data.categories[catKey].subcategories[topicKey].questions;
+    const idx = questions.findIndex(x => x.id === state.editingId);
+    if (idx >= 0) {
+      questions[idx] = newQ;
+    } else {
+      // May have moved category
+      for (const cat of Object.values(state.data.categories))
+        for (const topic of Object.values(cat.subcategories)) {
+          const i = topic.questions.findIndex(x => x.id === state.editingId);
+          if (i >= 0) { topic.questions.splice(i, 1); break; }
+        }
+      state.data.categories[catKey].subcategories[topicKey].questions.push(newQ);
+    }
+  } else {
+    state.data.categories[catKey].subcategories[topicKey].questions.push(newQ);
+  }
+
+  saveState();
+  document.getElementById('modal').classList.remove('open');
+  state.activeCategory = catKey;
+  state.activeTopic = topicKey;
+  render();
+}
+
+function deleteQuestion(id) {
+  for (const cat of Object.values(state.data.categories))
+    for (const topic of Object.values(cat.subcategories)) {
+      const i = topic.questions.findIndex(q => q.id === id);
+      if (i >= 0) { topic.questions.splice(i, 1); break; }
+    }
+  delete state.reviewed[id];
+  delete state.bookmarked[id];
+  delete state.notes[id];
+  saveState();
+  render();
+}
+
+// ═══════════════════════════════════════════
+//  IMPORT / EXPORT
+// ═══════════════════════════════════════════
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'prepkit_questions.json';
+  a.click();
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.categories) throw new Error('Invalid format');
+      // Merge
+      for (const [catKey, cat] of Object.entries(imported.categories)) {
+        if (!state.data.categories[catKey]) {
+          state.data.categories[catKey] = cat;
+        } else {
+          for (const [topicKey, topic] of Object.entries(cat.subcategories)) {
+            if (!state.data.categories[catKey].subcategories[topicKey]) {
+              state.data.categories[catKey].subcategories[topicKey] = topic;
+            } else {
+              // Merge questions (avoid duplicates by id)
+              const existingIds = new Set(state.data.categories[catKey].subcategories[topicKey].questions.map(q => q.id));
+              const newQs = topic.questions.filter(q => !existingIds.has(q.id));
+              state.data.categories[catKey].subcategories[topicKey].questions.push(...newQs);
+            }
+          }
+        }
+      }
+      saveState();
+      document.getElementById('import-status').textContent = '✓ Import successful!';
+      render();
+    } catch(err) {
+      document.getElementById('import-status').style.color = 'var(--red)';
+      document.getElementById('import-status').textContent = '✕ Invalid JSON file. Check format.';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════
+function applyTheme() {
+  document.body.classList.toggle('light', state.theme === 'light');
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  applyTheme();
+  render();
+
+  // Sidebar toggle
+  document.getElementById('toggle-sidebar').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  });
+
+  // Theme toggle
+  document.getElementById('btn-theme').addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(); saveState();
+  });
+
+  // Add button
+  document.getElementById('btn-add').addEventListener('click', openAddModal);
+  document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
+  document.getElementById('modal-cancel').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
+  document.getElementById('modal-save').addEventListener('click', saveQuestion);
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); });
+
+  // Import/export
+  document.getElementById('btn-import-export').addEventListener('click', () => document.getElementById('io-modal').classList.add('open'));
+  document.getElementById('io-modal-close').addEventListener('click', () => document.getElementById('io-modal').classList.remove('open'));
+  document.getElementById('io-modal-cancel').addEventListener('click', () => document.getElementById('io-modal').classList.remove('open'));
+  document.getElementById('io-modal').addEventListener('click', e => { if (e.target === document.getElementById('io-modal')) document.getElementById('io-modal').classList.remove('open'); });
+  document.getElementById('btn-export-json').addEventListener('click', exportJSON);
+  document.getElementById('btn-pick-file').addEventListener('click', () => document.getElementById('import-file').click());
+  document.getElementById('import-file').addEventListener('change', e => { if (e.target.files[0]) importJSON(e.target.files[0]); });
+
+  // Difficulty filters
+  document.querySelectorAll('[data-diff]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.diffFilter = btn.dataset.diff;
+      document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderStats(); renderQuestions();
+    });
+  });
+
+  // Reviewed / Bookmarked filters
+  document.getElementById('btn-show-reviewed').addEventListener('click', function() {
+    state.showReviewed = !state.showReviewed;
+    this.classList.toggle('active', state.showReviewed);
+    renderStats(); renderQuestions();
+  });
+  document.getElementById('btn-show-bookmarked').addEventListener('click', function() {
+    state.showBookmarked = !state.showBookmarked;
+    this.classList.toggle('active', state.showBookmarked);
+    renderStats(); renderQuestions();
+  });
+
+  // Search
+  let searchTimeout;
+  document.getElementById('q-search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      state.searchQuery = this.value;
+      renderStats(); renderQuestions();
+    }, 200);
+  });
+
+  // Sidebar search
+  document.getElementById('sidebar-search').addEventListener('input', () => renderSidebar());
+
+  // Tooltip: use fixed positioning below button so it never gets clipped
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const tipLeft  = Math.round(rect.left + rect.width / 2);
+    const tipTop   = Math.round(rect.bottom + 10);   // below the button
+    const arrowTop = Math.round(rect.bottom + 0);    // arrow sits right under button
+    el.style.setProperty('--tip-left',  tipLeft  + 'px');
+    el.style.setProperty('--tip-top',   tipTop   + 'px');
+    el.style.setProperty('--tip-arrow', arrowTop + 'px');
+  });
+});
+</script>
+</body>
+</html>
